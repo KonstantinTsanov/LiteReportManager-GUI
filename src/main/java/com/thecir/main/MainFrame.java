@@ -23,8 +23,12 @@
  */
 package com.thecir.main;
 
+import com.thecir.panels.MainPanel;
+import java.awt.Dimension;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import lombok.extern.java.Log;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * The frame for the application. Main entry point is located here.
@@ -34,10 +38,21 @@ import lombok.extern.java.Log;
 @Log
 public class MainFrame extends JFrame {
 
+    private JPanel mainPanel;
+
+    public MainFrame() {
+        setMinimumSize(new Dimension(550, 400));
+        setLayout(new MigLayout("", "[grow,fill]", "[grow,fill]"));
+        mainPanel = new MainPanel();
+        add(mainPanel);
+    }
+
     /**
      * Entry point for the application.
+     *
+     * @param args
      */
-    public void main() {
+    public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
