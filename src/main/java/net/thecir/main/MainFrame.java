@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.thecir.main;
+package net.thecir.main;
 
-import com.thecir.enums.Languages;
-import com.thecir.panels.MainPanel;
+import net.thecir.enums.Languages;
+import net.thecir.panels.MainPanel;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;

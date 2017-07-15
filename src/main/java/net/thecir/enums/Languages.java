@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.thecir.enums;
+package net.thecir.enums;
 
 import java.util.Locale;
 import lombok.Getter;

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.thecir.panels;
+package net.thecir.panels;
 
 import java.util.ResourceBundle;
 import javax.swing.ButtonGroup;
