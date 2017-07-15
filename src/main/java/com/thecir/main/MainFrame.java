@@ -23,10 +23,23 @@
  */
 package com.thecir.main;
 
+import com.thecir.enums.Languages;
 import com.thecir.panels.MainPanel;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.java.Log;
 import net.miginfocom.swing.MigLayout;
 
@@ -38,13 +51,121 @@ import net.miginfocom.swing.MigLayout;
 @Log
 public class MainFrame extends JFrame {
 
-    private JPanel mainPanel;
+    private MainPanel mainPanel;
+
+    private JMenuBar topMenuBar;
+    private JMenu fileJMenu, optionsJMenu, languageJMenu;
+    private JMenuItem exitJMenuItem;
+
+    private final Locale locale = getLocaleFromPreferences();
 
     public MainFrame() {
-        setMinimumSize(new Dimension(550, 400));
+        setMinimumSize(new Dimension(550, 300));
         setLayout(new MigLayout("", "[grow,fill]", "[grow,fill]"));
+        setTitle("Lite Report Manager");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         mainPanel = new MainPanel();
+        initMenuBar();
         add(mainPanel);
+        setLanguage(locale);
+        pack();
+    }
+
+    private void initMenuBar() {
+        topMenuBar = new JMenuBar();
+        createInitFileMenu();
+        createInitOptionsMenu();
+        setJMenuBar(topMenuBar);
+    }
+
+    /**
+     * creates and initializes the file menu and submenus.
+     */
+    private void createInitFileMenu() {
+        fileJMenu = new JMenu();
+        fileJMenu.setMnemonic(KeyEvent.VK_F);
+        exitJMenuItem = new JMenuItem();
+        exitJMenuItem.setMnemonic(KeyEvent.VK_E);
+        exitJMenuItem.addActionListener((ActionEvent event) -> {
+            System.exit(0);
+        });
+        fileJMenu.add(exitJMenuItem);
+        topMenuBar.add(fileJMenu);
+    }
+
+    /**
+     * Creates and initializes the options menu and submenu.
+     */
+    private void createInitOptionsMenu() {
+        optionsJMenu = new JMenu();
+        optionsJMenu.setMnemonic(KeyEvent.VK_O);
+        languageJMenu = new JMenu();
+        for (Languages lang : Languages.values()) {
+            JMenuItem language = new JMenuItem(lang.getName());
+            language.addActionListener((ActionEvent ActionEvent) -> {
+                if (!getLocaleFromPreferences().getCountry().equals(lang.getLocale().getCountry())
+                        && !getLocaleFromPreferences().getLanguage().equals(lang.getLocale().getLanguage())) {
+                    setLanguage(lang.getLocale());
+                    setLocaleToPreferences(lang);
+                    pack();
+                }
+            });
+            languageJMenu.add(language);
+        }
+        optionsJMenu.add(languageJMenu);
+        topMenuBar.add(optionsJMenu);
+    }
+
+    /**
+     * Sets the language for the whole application.
+     *
+     * @param locale Language to be used.
+     */
+    private void setLanguage(Locale locale) {
+        Locale.setDefault(locale);
+        mainPanel.setComponentText();
+        setComponentText();
+    }
+
+    /**
+     * Gets the lastly used language from the registry(windows) or whatever it
+     * is in linux
+     *
+     * @return new locale object, composed of the extracted parameters
+     */
+    private Locale getLocaleFromPreferences() {
+        Preferences prefs = Preferences.userRoot().node(getClass().getName());
+        String language = "Language";
+        String country = "Country";
+        return new Locale(prefs.get(language, "en"), prefs.get(country, "US"));
+    }
+
+    /**
+     * Sets the lastly used language in the registry(windows) or whatever it is
+     * in linux
+     *
+     * @param lang enum containing the required variables
+     */
+    private void setLocaleToPreferences(Languages lang) {
+        Preferences prefs = Preferences.userRoot().node(getClass().getName());
+        String language = "Language";
+        String country = "Country";
+        prefs.put(language, lang.getShortLanguage());
+        prefs.put(country, lang.getShortCountry());
+    }
+
+    /**
+     * Sets the text for the frame's components.
+     *
+     * @param locale
+     */
+    private void setComponentText() {
+        ResourceBundle r = ResourceBundle.getBundle("Bundle");
+        fileJMenu.setText(r.getString("MainFrame.optionsMenu.fileJMenu"));
+        exitJMenuItem.setText(r.getString("MainFrame.optionsMenu.exitJMenuItem"));
+        optionsJMenu.setText(r.getString("MainFrame.optionsMenu.optionsJMenu"));
+        languageJMenu.setText(r.getString("MainFrame.optionsMenu.languageJMenu"));
     }
 
     /**
@@ -53,30 +174,17 @@ public class MainFrame extends JFrame {
      * @param args
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-            //TODO
+            UIManager.setLookAndFeel("com.seaglasslookandfeel.SeaGlassLookAndFeel");
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
-        //</editor-fold>
-        //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
