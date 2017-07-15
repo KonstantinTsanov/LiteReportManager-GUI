@@ -23,12 +23,14 @@
  */
 package com.thecir.panels;
 
+import java.util.ResourceBundle;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 
@@ -37,34 +39,38 @@ import net.miginfocom.swing.MigLayout;
  * @author Konstantin Tsanov <k.tsanov@gmail.com>
  */
 public class MainPanel extends JPanel {
-
+    
     private JLabel srcFileLabel;
     private JLabel destFileLabel;
-
+    
     private JTextField srcFilePath;
     private JTextField destFilePath;
-
+    
     private JButton selectSrcFileButton;
     private JButton selectDestFileButton;
     private JButton createNewFileButton;
     private JButton clearSrcFileButton;
     private JButton clearDestFileButton;
-
+    
     private JRadioButton technopolisJButton;
     private JRadioButton technomarketJButton;
     private ButtonGroup retailersButtonGroup;
-
+    
     private JButton generateReport;
     private JButton cancelButton;
 
     //If the data from the input file must be subtracted from the output file rather than added to it
     private JCheckBox subtractCheckBox;
-
+    
+    private JLabel statusLabel;
+    private JTextArea statusTextArea;
+    
     public MainPanel() {
         MigLayout layout = new MigLayout("", "[shrink 0][grow][shrink 0][shrink 0]", "[shrink 0][shrink 0][shrink 0][shrink 0][shrink 0]");
         setLayout(layout);
         initComponents();
         addComponents();
+        setComponentText();
     }
 
     /**
@@ -73,30 +79,35 @@ public class MainPanel extends JPanel {
     private void initComponents() {
         srcFileLabel = new JLabel();
         destFileLabel = new JLabel();
-
+        
         srcFilePath = new JTextField();
         srcFilePath.setEditable(false);
-
+        
         destFilePath = new JTextField();
         destFilePath.setEditable(false);
-
+        
         selectSrcFileButton = new JButton("...");
         selectDestFileButton = new JButton("...");
         createNewFileButton = new JButton("...");
         clearSrcFileButton = new JButton();
         clearDestFileButton = new JButton();
-
+        
         technopolisJButton = new JRadioButton();
         technomarketJButton = new JRadioButton();
         retailersButtonGroup = new ButtonGroup();
         retailersButtonGroup.add(technomarketJButton);
         retailersButtonGroup.add(technopolisJButton);
-
+        
         generateReport = new JButton();
         cancelButton = new JButton();
         subtractCheckBox = new JCheckBox();
+        
+        statusLabel = new JLabel();
+        statusTextArea = new JTextArea();
+        statusTextArea.setEditable(false);
+        statusTextArea.setOpaque(true);
     }
-
+    
     private void addComponents() {
         add(srcFileLabel);
         add(srcFilePath, "growx");
@@ -109,7 +120,25 @@ public class MainPanel extends JPanel {
         add(createNewFileButton, "growx, wrap");
         add(technopolisJButton, "growx");
         add(technomarketJButton, "growx, wrap");
-        add(generateReport, "span, center, split 2");
+        add(generateReport, "span, center, split 3");
         add(cancelButton);
+        add(subtractCheckBox, "wrap");
+        add(statusLabel);
+        add(statusTextArea, "span, growx");
+    }
+    
+    public void setComponentText() {
+        ResourceBundle r = ResourceBundle.getBundle("Bundle");
+        srcFileLabel.setText(r.getString("MainPanel.srcFileLabel"));
+        clearSrcFileButton.setText(r.getString("MainPanel.clearButton"));
+        destFileLabel.setText(r.getString("MainPanel.destFileLabel"));
+        clearDestFileButton.setText(r.getString("MainPanel.clearButton"));
+        createNewFileButton.setText(r.getString("MainPanel.createNewFileButton"));
+        technopolisJButton.setText(r.getString("MainPanel.technopolisJButton"));
+        technomarketJButton.setText(r.getString("MainPanel.technomarketJButton"));
+        generateReport.setText(r.getString("MainPanel.generateReport"));
+        cancelButton.setText(r.getString("MainPanel.cancelButton"));
+        subtractCheckBox.setText(r.getString("MainPanel.subtractCheckBox"));
+        statusLabel.setText(r.getString("MainPanel.statusLabel"));
     }
 }
