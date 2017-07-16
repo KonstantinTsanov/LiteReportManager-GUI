@@ -26,7 +26,7 @@ package net.thecir.filechoosers;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import net.thecir.callbacks.FileCallback;
 
 /**
@@ -40,22 +40,8 @@ public class CustomFileChooser extends JFileChooser implements FileCallback {
     public CustomFileChooser(JFrame parent) {
         this.parent = parent;
         setFileSelectionMode(FILES_ONLY);
-        setFileFilter(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                if (file.isDirectory()) {
-                    return true;
-                } else {
-                    String filename = file.getName().toLowerCase();
-                    return filename.endsWith(".xslx");
-                }
-            }
-
-            @Override
-            public String getDescription() {
-                return "Excel Workbook (*.xlsx)";
-            }
-        });
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Workbook", "xlsx");
+        setFileFilter(filter);
     }
 
     @Override
