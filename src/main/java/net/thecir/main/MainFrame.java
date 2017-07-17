@@ -37,7 +37,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import lombok.extern.java.Log;
@@ -56,7 +55,6 @@ public class MainFrame extends JFrame {
     private JMenuBar topMenuBar;
     private JMenu fileJMenu, optionsJMenu, languageJMenu;
     private JMenuItem exitJMenuItem;
-
     private final Locale locale = getLocaleFromPreferences();
 
     public MainFrame() {
@@ -65,7 +63,7 @@ public class MainFrame extends JFrame {
         setTitle("Lite Report Manager");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        mainPanel = new MainPanel();
+        mainPanel = new MainPanel(this);
         initMenuBar();
         add(mainPanel);
         setLanguage(locale);
