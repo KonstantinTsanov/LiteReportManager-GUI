@@ -23,10 +23,13 @@
  */
 package net.thecir.panels;
 
+import java.io.File;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,7 +38,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import net.miginfocom.swing.MigLayout;
 import net.thecir.core.LiteReportManager;
-import net.thecir.filechoosers.CustomFileChooser;
+import net.thecir.filechoosers.CreateNewFileChooser;
+import net.thecir.filechoosers.SelectExistingFileChooser;
 import net.thecir.filemanagers.NewFileManager;
 
 /**
@@ -69,10 +73,17 @@ public class MainPanel extends JPanel {
     private JLabel statusLabel;
     private JTextArea statusTextArea;
 
-    private JFrame parent;
+    private final JFrame parent;
+
+    private final SelectExistingFileChooser inputFileChooser;
+    private final SelectExistingFileChooser outputFileChooser;
+    private final CreateNewFileChooser createOutputFileChooser;
 
     public MainPanel(JFrame parent) {
         this.parent = parent;
+        inputFileChooser = new SelectExistingFileChooser(parent, "xlsx", "xls");
+        outputFileChooser = new SelectExistingFileChooser(parent, "xlsx");
+        createOutputFileChooser = new CreateNewFileChooser(parent, "xlsx");
         MigLayout layout = new MigLayout("", "[shrink 0][grow][shrink 0][shrink 0]", "[shrink 0][shrink 0][shrink 0][shrink 0][shrink 0]");
         setLayout(layout);
         initComponents();
@@ -152,7 +163,8 @@ public class MainPanel extends JPanel {
 
     private void attachListeners() {
         createNewFileButton.addActionListener((ae) -> {
-            NewFileManager.getInstance().setFileCallback(new CustomFileChooser(parent));
+            NewFileManager.getInstance().setFileCallback(createOutputFileChooser);
+            LiteReportManager.getInstance().setOutputArea(destFilePath);
             LiteReportManager.getInstance().createNewFile();
         });
     }
