@@ -159,7 +159,7 @@ public class MainFrame extends JFrame {
      * @param locale
      */
     private void setComponentText() {
-        ResourceBundle r = ResourceBundle.getBundle("Bundle");
+        ResourceBundle r = ResourceBundle.getBundle("LanguageBundles/ComponentText");
         fileJMenu.setText(r.getString("MainFrame.optionsMenu.fileJMenu"));
         exitJMenuItem.setText(r.getString("MainFrame.optionsMenu.exitJMenuItem"));
         optionsJMenu.setText(r.getString("MainFrame.optionsMenu.optionsJMenu"));
