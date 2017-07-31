@@ -23,20 +23,25 @@
  */
 package net.thecir.panels;
 
+import java.util.Locale;
 import java.util.ResourceBundle;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import static javax.swing.JFileChooser.FILES_ONLY;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import net.miginfocom.swing.MigLayout;
 import net.thecir.core.LiteReportManager;
+import net.thecir.enums.Stores;
 import net.thecir.filechoosers.CreateNewFileChooser;
-import net.thecir.filechoosers.SelectExistingFileChooser;
 import net.thecir.filemanagers.NewFileManager;
 
 /**
@@ -45,24 +50,23 @@ import net.thecir.filemanagers.NewFileManager;
  */
 public class MainPanel extends JPanel {
 
-    private JLabel srcFileLabel;
-    private JLabel destFileLabel;
+    private JLabel inputFileLabel;
+    private JLabel outputFileLabel;
 
-    private JTextField srcFilePath;
-    private JTextField destFilePath;
+    private JTextField inputFilePath;
+    private volatile JTextField outputFilePath;
 
     private JButton selectSrcFileButton;
     private JButton selectDestFileButton;
     private JButton createNewFileButton;
-    private JButton clearSrcFileButton;
-    private JButton clearDestFileButton;
+    private JButton clearInputFileButton;
+    private JButton clearOutputFileButton;
 
     private JRadioButton technopolisJButton;
     private JRadioButton technomarketJButton;
     private ButtonGroup retailersButtonGroup;
 
     private JButton generateReport;
-    private JButton cancelButton;
 
     //If the data from the input file must be subtracted from the output file rather than added to it
     private JCheckBox subtractCheckBox;
@@ -72,18 +76,40 @@ public class MainPanel extends JPanel {
 
     private final JFrame parent;
 
-    private final SelectExistingFileChooser inputFileChooser;
-    private final SelectExistingFileChooser outputFileChooser;
-    private final CreateNewFileChooser createOutputFileChooser;
+    private final JFileChooser inputFileChooser;
+    private final JFileChooser outputFileChooser;
+    private volatile CreateNewFileChooser createNewFileChooser;
+
+    private ResourceBundle errorBundle;
 
     public MainPanel(JFrame parent) {
-        this.parent = parent;
-        inputFileChooser = new SelectExistingFileChooser(parent, "xlsx", "xls");
-        outputFileChooser = new SelectExistingFileChooser(parent, "xlsx");
-        createOutputFileChooser = new CreateNewFileChooser(parent, "xlsx");
         MigLayout layout = new MigLayout("", "[shrink 0][grow][shrink 0][shrink 0]", "[shrink 0][shrink 0][shrink 0][shrink 0][shrink 0]");
         setLayout(layout);
+        this.parent = parent;
+        errorBundle = ResourceBundle.getBundle("LanguageBundles/ErrorMessages");
+        inputFileChooser = new JFileChooser() {
+            @Override
+            public void approveSelection() {
+                super.approveSelection();
+                inputFilePath.setText(getSelectedFile().toString());
+            }
+        };
+        outputFileChooser = new JFileChooser() {
+            @Override
+            public void approveSelection() {
+                super.approveSelection();
+                outputFilePath.setText(getSelectedFile().toString());
+            }
+        };
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Workbook (*.xls|*.xlsx)", "xlsx", "xls");
+        inputFileChooser.setFileSelectionMode(FILES_ONLY);
+        inputFileChooser.setAcceptAllFileFilterUsed(false);
+        inputFileChooser.setFileFilter(filter);
+        outputFileChooser.setFileSelectionMode(FILES_ONLY);
+        outputFileChooser.setAcceptAllFileFilterUsed(false);
+        outputFileChooser.setFileFilter(filter);
         initComponents();
+        createNewFileChooser = new CreateNewFileChooser(parent, outputFilePath, outputFileChooser, "xlsx");
         addComponents();
         setComponentText();
         attachListeners();
@@ -93,20 +119,20 @@ public class MainPanel extends JPanel {
      * Initializes all panel components.
      */
     private void initComponents() {
-        srcFileLabel = new JLabel();
-        destFileLabel = new JLabel();
+        inputFileLabel = new JLabel();
+        outputFileLabel = new JLabel();
 
-        srcFilePath = new JTextField();
-        srcFilePath.setEditable(false);
+        inputFilePath = new JTextField();
+        inputFilePath.setEditable(false);
 
-        destFilePath = new JTextField();
-        destFilePath.setEditable(false);
+        outputFilePath = new JTextField();
+        outputFilePath.setEditable(false);
 
         selectSrcFileButton = new JButton("...");
         selectDestFileButton = new JButton("...");
         createNewFileButton = new JButton("...");
-        clearSrcFileButton = new JButton();
-        clearDestFileButton = new JButton();
+        clearInputFileButton = new JButton();
+        clearOutputFileButton = new JButton();
 
         technopolisJButton = new JRadioButton();
         technomarketJButton = new JRadioButton();
@@ -115,7 +141,6 @@ public class MainPanel extends JPanel {
         retailersButtonGroup.add(technopolisJButton);
 
         generateReport = new JButton();
-        cancelButton = new JButton();
         subtractCheckBox = new JCheckBox();
 
         statusLabel = new JLabel();
@@ -125,44 +150,72 @@ public class MainPanel extends JPanel {
     }
 
     private void addComponents() {
-        add(srcFileLabel);
-        add(srcFilePath, "growx");
+        add(inputFileLabel);
+        add(inputFilePath, "growx");
         add(selectSrcFileButton, "growx");
-        add(clearSrcFileButton, "wrap");
-        add(destFileLabel, "span 1 2");
-        add(destFilePath, "growx, span 1 2, center");
+        add(clearInputFileButton, "wrap");
+        add(outputFileLabel, "span 1 2");
+        add(outputFilePath, "growx, span 1 2, center");
         add(selectDestFileButton, "growx");
-        add(clearDestFileButton, "span 1 2,wrap");
+        add(clearOutputFileButton, "span 1 2,wrap");
         add(createNewFileButton, "growx, wrap");
         add(technopolisJButton, "growx");
         add(technomarketJButton, "growx, wrap");
-        add(generateReport, "span, center, split 3");
-        add(cancelButton);
+        add(generateReport, "span, center, split 2");
         add(subtractCheckBox, "wrap");
         add(statusLabel);
         add(statusTextArea, "span, growx");
     }
 
     public void setComponentText() {
-        ResourceBundle r = ResourceBundle.getBundle("Bundle");
-        srcFileLabel.setText(r.getString("MainPanel.srcFileLabel"));
-        clearSrcFileButton.setText(r.getString("MainPanel.clearButton"));
-        destFileLabel.setText(r.getString("MainPanel.destFileLabel"));
-        clearDestFileButton.setText(r.getString("MainPanel.clearButton"));
+        System.out.println("sad" + Locale.getDefault());
+        createNewFileChooser.setLocale(Locale.getDefault());
+
+        ResourceBundle r = ResourceBundle.getBundle("LanguageBundles/ComponentText");
+        inputFileLabel.setText(r.getString("MainPanel.srcFileLabel"));
+        clearInputFileButton.setText(r.getString("MainPanel.clearButton"));
+        outputFileLabel.setText(r.getString("MainPanel.destFileLabel"));
+        clearOutputFileButton.setText(r.getString("MainPanel.clearButton"));
         createNewFileButton.setText(r.getString("MainPanel.createNewFileButton"));
         technopolisJButton.setText(r.getString("MainPanel.technopolisJButton"));
         technomarketJButton.setText(r.getString("MainPanel.technomarketJButton"));
         generateReport.setText(r.getString("MainPanel.generateReport"));
-        cancelButton.setText(r.getString("MainPanel.cancelButton"));
         subtractCheckBox.setText(r.getString("MainPanel.subtractCheckBox"));
         statusLabel.setText(r.getString("MainPanel.statusLabel"));
     }
 
     private void attachListeners() {
+        selectSrcFileButton.addActionListener((ae) -> {
+            inputFileChooser.showOpenDialog(parent);
+        });
+        selectDestFileButton.addActionListener((ae) -> {
+            outputFileChooser.showOpenDialog(parent);
+        });
         createNewFileButton.addActionListener((ae) -> {
-            NewFileManager.getInstance().setFileCallback(createOutputFileChooser);
-            LiteReportManager.getInstance().setOutputArea(destFilePath);
+            NewFileManager.getInstance().setFileCallback(createNewFileChooser);
+            LiteReportManager.getInstance().initOutputComponents(parent);
             LiteReportManager.getInstance().createNewFile();
+        });
+        clearInputFileButton.addActionListener((ae) -> {
+            inputFileChooser.setSelectedFile(null);
+            inputFilePath.setText(null);
+        });
+        clearOutputFileButton.addActionListener((ae) -> {
+            outputFileChooser.setSelectedFile(null);
+            outputFilePath.setText(null);
+        });
+        generateReport.addActionListener((ae) -> {
+            if (inputFileChooser.getSelectedFile() == null) {
+                JOptionPane.showMessageDialog(parent, errorBundle.getString("NoInputFileSelected"));
+            } else if (outputFileChooser.getSelectedFile() == null) {
+                JOptionPane.showMessageDialog(parent, errorBundle.getString("NoOutputFileSelected"));
+            } else if (retailersButtonGroup.getSelection() == null) {
+                JOptionPane.showMessageDialog(parent, errorBundle.getString("SelectRetailerMessage"));
+            } else {
+                LiteReportManager.getInstance().initOutputComponents(parent);
+                LiteReportManager.getInstance().generateReport(inputFileChooser.getSelectedFile(),
+                        outputFileChooser.getSelectedFile(), subtractCheckBox.isSelected(), technomarketJButton.isSelected() ? Stores.Technomarket : Stores.Technopolis);
+            }
         });
     }
 }
