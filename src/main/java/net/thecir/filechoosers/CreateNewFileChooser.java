@@ -24,8 +24,12 @@
 package net.thecir.filechoosers;
 
 import java.io.File;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import net.thecir.callbacks.FileCallback;
 
@@ -36,12 +40,19 @@ import net.thecir.callbacks.FileCallback;
 public class CreateNewFileChooser extends JFileChooser implements FileCallback {
 
     private final JFrame parent;
+    private final JTextField newFileField;
+    //To set the output file
+    private final JFileChooser outputFileChooser;
+    private ResourceBundle errorBundle;
 
-    public CreateNewFileChooser(JFrame parent, String... extensions) {
+    public CreateNewFileChooser(JFrame parent, JTextField newFileField, JFileChooser outputFileChooser, String... extensions) {
         this.parent = parent;
+        this.newFileField = newFileField;
+        this.outputFileChooser = outputFileChooser;
         setFileSelectionMode(FILES_ONLY);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Workbook", extensions);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Excel Workbook (.xlsx)", extensions);
         setFileFilter(filter);
+        setAcceptAllFileFilterUsed(false);
     }
 
     @Override
@@ -52,5 +63,29 @@ public class CreateNewFileChooser extends JFileChooser implements FileCallback {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public void approveSelection() {
+        File f = getSelectedFile();
+        if (f.exists() && getDialogType() == SAVE_DIALOG) {
+            errorBundle = ResourceBundle.getBundle("LanguageBundles/ErrorMessages");
+            int result = JOptionPane.showConfirmDialog(this, errorBundle.getString("FileAlreadyExistsOverwrite"), errorBundle.getString("ExistingFileLabel"), JOptionPane.YES_NO_CANCEL_OPTION);
+            switch (result) {
+                case JOptionPane.YES_OPTION:
+                    super.approveSelection();
+                    newFileField.setText(getSelectedFile() == null ? null : getSelectedFile().toString());
+                    outputFileChooser.setSelectedFile(getSelectedFile());
+                    return;
+                case JOptionPane.NO_OPTION:
+                    return;
+                case JOptionPane.CLOSED_OPTION:
+                    return;
+                case JOptionPane.CANCEL_OPTION:
+                    cancelSelection();
+                    return;
+            }
+        }
+        super.approveSelection();
     }
 }
