@@ -168,9 +168,7 @@ public class MainPanel extends JPanel {
     }
 
     public void setComponentText() {
-        System.out.println("sad" + Locale.getDefault());
         createNewFileChooser.setLocale(Locale.getDefault());
-
         ResourceBundle r = ResourceBundle.getBundle("LanguageBundles/ComponentText");
         inputFileLabel.setText(r.getString("MainPanel.srcFileLabel"));
         clearInputFileButton.setText(r.getString("MainPanel.clearButton"));
