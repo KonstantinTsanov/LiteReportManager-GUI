@@ -35,7 +35,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import net.miginfocom.swing.MigLayout;
@@ -72,7 +71,7 @@ public class MainPanel extends JPanel {
     private JCheckBox subtractCheckBox;
 
     private JLabel statusLabel;
-    private JTextArea statusTextArea;
+    private JTextField statusBar;
 
     private final JFrame parent;
 
@@ -144,9 +143,9 @@ public class MainPanel extends JPanel {
         subtractCheckBox = new JCheckBox();
 
         statusLabel = new JLabel();
-        statusTextArea = new JTextArea();
-        statusTextArea.setEditable(false);
-        statusTextArea.setOpaque(true);
+        statusBar = new JTextField();
+        statusBar.setEditable(false);
+        statusBar.setOpaque(true);
     }
 
     private void addComponents() {
@@ -164,7 +163,7 @@ public class MainPanel extends JPanel {
         add(generateReport, "span, center, split 2");
         add(subtractCheckBox, "wrap");
         add(statusLabel);
-        add(statusTextArea, "span, growx");
+        add(statusBar, "span, growx");
     }
 
     public void setComponentText() {
@@ -190,8 +189,9 @@ public class MainPanel extends JPanel {
             outputFileChooser.showOpenDialog(parent);
         });
         createNewFileButton.addActionListener((ae) -> {
+            statusBar.setText("");
             NewFileManager.getInstance().setFileCallback(createNewFileChooser);
-            LiteReportManager.getInstance().initOutputComponents(parent);
+            LiteReportManager.getInstance().initOutputComponents(parent, statusBar);
             LiteReportManager.getInstance().createNewFile();
         });
         clearInputFileButton.addActionListener((ae) -> {
@@ -203,14 +203,17 @@ public class MainPanel extends JPanel {
             outputFilePath.setText(null);
         });
         generateReport.addActionListener((ae) -> {
+            statusBar.setText("");
             if (inputFileChooser.getSelectedFile() == null) {
+                System.out.println(Locale.getDefault());
+                System.out.println(errorBundle.getString("NoInputFileSelected"));
                 JOptionPane.showMessageDialog(parent, errorBundle.getString("NoInputFileSelected"));
             } else if (outputFileChooser.getSelectedFile() == null) {
                 JOptionPane.showMessageDialog(parent, errorBundle.getString("NoOutputFileSelected"));
             } else if (retailersButtonGroup.getSelection() == null) {
                 JOptionPane.showMessageDialog(parent, errorBundle.getString("SelectRetailerMessage"));
             } else {
-                LiteReportManager.getInstance().initOutputComponents(parent);
+                LiteReportManager.getInstance().initOutputComponents(parent, statusBar);
                 LiteReportManager.getInstance().generateReport(inputFileChooser.getSelectedFile(),
                         outputFileChooser.getSelectedFile(), subtractCheckBox.isSelected(), technomarketJButton.isSelected() ? Stores.Technomarket : Stores.Technopolis);
             }
