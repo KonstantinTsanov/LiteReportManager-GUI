@@ -136,7 +136,9 @@ public class MainFrame extends JFrame {
         Preferences prefs = Preferences.userRoot().node(getClass().getName());
         String language = "Language";
         String country = "Country";
-        return new Locale(prefs.get(language, "en"), prefs.get(country, "US"));
+        Locale newLocale = new Locale(prefs.get(language, "en"), prefs.get(country, "US"));
+        Locale.setDefault(newLocale);
+        return newLocale;
     }
 
     /**
