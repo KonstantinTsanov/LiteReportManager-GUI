@@ -24,7 +24,6 @@
 package net.thecir.filechoosers;
 
 import java.io.File;
-import java.util.Locale;
 import java.util.ResourceBundle;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -32,6 +31,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import net.thecir.callbacks.FileCallback;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  *
@@ -66,26 +66,46 @@ public class CreateNewFileChooser extends JFileChooser implements FileCallback {
     }
 
     @Override
+    public void setAsOutputAndDisplay() {
+        newFileField.setText(getSelectedFile() == null ? null : getSelectedFile().toString());
+        outputFileChooser.setSelectedFile(getSelectedFile());
+    }
+
+    @Override
     public void approveSelection() {
-        File f = getSelectedFile();
-        if (f.exists() && getDialogType() == SAVE_DIALOG) {
-            errorBundle = ResourceBundle.getBundle("LanguageBundles/ErrorMessages");
-            int result = JOptionPane.showConfirmDialog(this, errorBundle.getString("FileAlreadyExistsOverwrite"), errorBundle.getString("ExistingFileLabel"), JOptionPane.YES_NO_CANCEL_OPTION);
-            switch (result) {
-                case JOptionPane.YES_OPTION:
-                    super.approveSelection();
-                    newFileField.setText(getSelectedFile() == null ? null : getSelectedFile().toString());
-                    outputFileChooser.setSelectedFile(getSelectedFile());
-                    return;
-                case JOptionPane.NO_OPTION:
-                    return;
-                case JOptionPane.CLOSED_OPTION:
-                    return;
-                case JOptionPane.CANCEL_OPTION:
-                    cancelSelection();
-                    return;
+        File f = manageExtension(getSelectedFile());
+        setSelectedFile(f);
+        if (getDialogType() == SAVE_DIALOG) {
+            if (f.exists()) {
+                errorBundle = ResourceBundle.getBundle("LanguageBundles/ErrorMessages");
+                int result = JOptionPane.showConfirmDialog(this, errorBundle.getString("FileAlreadyExistsOverwrite"), errorBundle.getString("ExistingFileLabel"), JOptionPane.YES_NO_CANCEL_OPTION);
+                switch (result) {
+                    case JOptionPane.YES_OPTION:
+                        super.approveSelection();
+                        return;
+                    case JOptionPane.NO_OPTION:
+                        return;
+                    case JOptionPane.CLOSED_OPTION:
+                        return;
+                    case JOptionPane.CANCEL_OPTION:
+                        cancelSelection();
+                        return;
+                }
+            } else {
+                super.approveSelection();
             }
         }
         super.approveSelection();
+    }
+
+    private File manageExtension(File file) {
+        if (!FilenameUtils.getExtension(file.getName()).equalsIgnoreCase("xlsx")) {
+            if ("".equals(FilenameUtils.getExtension(file.getAbsolutePath()))) {
+                return new File(file.toString() + ".xlsx");
+            } else {
+                return new File(file.getParentFile(), FilenameUtils.getBaseName(file.getName()) + ".xlsx");
+            }
+        }
+        return file;
     }
 }
