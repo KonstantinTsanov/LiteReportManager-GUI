@@ -26,13 +26,21 @@ package net.thecir.main;
 import net.thecir.enums.Languages;
 import net.thecir.panels.MainPanel;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -65,6 +73,7 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         mainPanel = new MainPanel(this);
         initMenuBar();
+        loadImages();
         add(mainPanel);
         setLanguage(locale);
         pack();
@@ -166,6 +175,28 @@ public class MainFrame extends JFrame {
         exitJMenuItem.setText(r.getString("MainFrame.optionsMenu.exitJMenuItem"));
         optionsJMenu.setText(r.getString("MainFrame.optionsMenu.optionsJMenu"));
         languageJMenu.setText(r.getString("MainFrame.optionsMenu.languageJMenu"));
+    }
+
+    private void loadImages() {
+        List<Image> icons = new ArrayList<>();
+        java.net.URL logo16 = ClassLoader.getSystemResource("images/logo_16x16.png");
+        java.net.URL logo32 = ClassLoader.getSystemResource("images/logo_32x32.png");
+        java.net.URL logo64 = ClassLoader.getSystemResource("images/logo_64x64.png");
+        java.net.URL logo128 = ClassLoader.getSystemResource("images/logo_128x128.png");
+
+        try {
+            BufferedImage img16 = ImageIO.read(logo16);
+            BufferedImage img32 = ImageIO.read(logo32);
+            BufferedImage img64 = ImageIO.read(logo64);
+            BufferedImage img128 = ImageIO.read(logo128);
+            icons.add(img16);
+            icons.add(img32);
+            icons.add(img64);
+            icons.add(img128);
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        this.setIconImages(icons);
     }
 
     /**
