@@ -80,12 +80,16 @@ public class MainPanel extends JPanel {
     private volatile CreateNewFileChooser createNewFileChooser;
 
     private ResourceBundle errorBundle;
+    private ResourceBundle messagesBundle;
+    private ResourceBundle backEndErrorBundle;
 
     public MainPanel(JFrame parent) {
         MigLayout layout = new MigLayout("", "[shrink 0][grow][shrink 0][shrink 0]", "[shrink 0][shrink 0][shrink 0][shrink 0][shrink 0]");
         setLayout(layout);
         this.parent = parent;
         errorBundle = ResourceBundle.getBundle("LanguageBundles/ErrorMessages");
+        messagesBundle = ResourceBundle.getBundle("LanguageBundles/Messages");
+        backEndErrorBundle = ResourceBundle.getBundle("CoreLanguageBundles/ErrorMessages");
         inputFileChooser = new JFileChooser() {
             @Override
             public void approveSelection() {
@@ -168,6 +172,9 @@ public class MainPanel extends JPanel {
 
     public void setComponentText() {
         createNewFileChooser.setLocale(Locale.getDefault());
+        messagesBundle = ResourceBundle.getBundle("LanguageBundles/Messages");
+        errorBundle = ResourceBundle.getBundle("LanguageBundles/ErrorMessages");
+        backEndErrorBundle = ResourceBundle.getBundle("CoreLanguageBundles/ErrorMessages");
         ResourceBundle r = ResourceBundle.getBundle("LanguageBundles/ComponentText");
         inputFileLabel.setText(r.getString("MainPanel.srcFileLabel"));
         clearInputFileButton.setText(r.getString("MainPanel.clearButton"));
@@ -189,7 +196,7 @@ public class MainPanel extends JPanel {
             outputFileChooser.showOpenDialog(parent);
         });
         createNewFileButton.addActionListener((ae) -> {
-            statusBar.setText("");
+            statusBar.setText(messagesBundle.getString("CreatingNewFile"));
             NewFileManager.getInstance().setFileCallback(createNewFileChooser);
             LiteReportManager.getInstance().initOutputComponents(parent, statusBar);
             LiteReportManager.getInstance().createNewFile();
@@ -203,15 +210,16 @@ public class MainPanel extends JPanel {
             outputFilePath.setText(null);
         });
         generateReport.addActionListener((ae) -> {
-            statusBar.setText("");
+            statusBar.setText(messagesBundle.getString("GeneratingReport"));
             if (inputFileChooser.getSelectedFile() == null) {
-                System.out.println(Locale.getDefault());
-                System.out.println(errorBundle.getString("NoInputFileSelected"));
                 JOptionPane.showMessageDialog(parent, errorBundle.getString("NoInputFileSelected"));
+                statusBar.setText(backEndErrorBundle.getString("FailedToGenerateReport"));
             } else if (outputFileChooser.getSelectedFile() == null) {
                 JOptionPane.showMessageDialog(parent, errorBundle.getString("NoOutputFileSelected"));
+                statusBar.setText(backEndErrorBundle.getString("FailedToGenerateReport"));
             } else if (retailersButtonGroup.getSelection() == null) {
                 JOptionPane.showMessageDialog(parent, errorBundle.getString("SelectRetailerMessage"));
+                statusBar.setText(backEndErrorBundle.getString("FailedToGenerateReport"));
             } else {
                 LiteReportManager.getInstance().initOutputComponents(parent, statusBar);
                 LiteReportManager.getInstance().generateReport(inputFileChooser.getSelectedFile(),
